@@ -81,6 +81,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
            }
        }
+        // If swipe up
+        // findViewById<SwitchCompat>(R.id.flashSwitch).isChecked = true
+        // If not swipe
+        // findViewById<SwitchCompat>(R.id.flashSwitch).isChecked = false
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
