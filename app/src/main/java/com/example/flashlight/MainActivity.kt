@@ -12,36 +12,28 @@ import android.hardware.camera2.CameraManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Button
 import androidx.appcompat.widget.SwitchCompat
 
-class MainActivity : AppCompatActivity(), SensorEventListener {
+class MainActivity : AppCompatActivity(), GestureDetector.OnGestureListener {
+    private lateinit var cameraManager: CameraManager
+    private lateinit var gestureDetector: GestureDetector
+    private lateinit var switch: SwitchCompat
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val action = findViewById<EditText>(R.id.action)
-        val switch = findViewById<SwitchCompat>(R.id.flashSwitch)
-        val text = findViewById<TextView>(R.id.textView)
+        switch = findViewById(R.id.flashSwitch)
         val submit = findViewById<Button>(R.id.submit)
 
-        val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        val cameraId = cameraManager.cameraIdList[0]
-
-        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val mSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
-
-//        val triggerEventListener = object : TriggerEventListener() {
-//            override fun onTrigger(event: TriggerEvent?) {
-//                // do Somethign
-//            }
-//        }
-//        mSensor?.also { sensor ->
-//            sensorManager.requestTriggerSensor(triggerEventListener, sensor)
-//        }
-
+        gestureDetector = GestureDetector(this)
+        cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
         submit.setOnClickListener {
             if (action.text.toString() == "ON") {
@@ -53,41 +45,83 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                text.text = "Good"
-
-                try {
-                    cameraManager.setTorchMode(cameraId, true)
-                } catch(e: CameraAccessException) {
-                    val err = Throwable(e)
-                    Log.e("Camera could not turn on! ", err.toString())
-                }
+                turnCamOn(cameraManager)
 
             } else {
-                text.text = "Bad"
-                try {
-                    cameraManager.setTorchMode(cameraId, false)
-                } catch(e: CameraAccessException) {
-                    val err = Throwable(e)
-                    Log.e("Camera could not turn off! ", err.toString())
-                }
+               turnCamOff(cameraManager)
             }
         }
 
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
-       if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-           if (event.values[2] > 9.8) {
 
-           }
-       }
-        // If swipe up
-        // findViewById<SwitchCompat>(R.id.flashSwitch).isChecked = true
-        // If not swipe
-        // findViewById<SwitchCompat>(R.id.flashSwitch).isChecked = false
+    private fun turnCamOn(cam: CameraManager) {
+        try {
+            cam.setTorchMode(cam.cameraIdList[0], true)
+        } catch(e: CameraAccessException) {
+            val err = Throwable(e)
+            Log.e("Camera could not turn on!", err.toString())
+        }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        TODO("Not yet implemented")
+    private fun turnCamOff(cam: CameraManager) {
+        try {
+            cam.setTorchMode(cam.cameraIdList[0], false)
+        } catch(e: CameraAccessException) {
+            val err = Throwable(e)
+            Log.e("Camera could not turn off!", err.toString())
+        }
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        return if (gestureDetector.onTouchEvent(event)) {
+            true
+        }
+        else {
+            super.onTouchEvent(event)
+        }
+        return super.onTouchEvent(event)
+    }
+
+    override fun onDown(e: MotionEvent): Boolean {
+        return false
+    }
+
+    override fun onShowPress(e: MotionEvent) {
+        return
+    }
+
+    override fun onSingleTapUp(e: MotionEvent): Boolean {
+        return false
+    }
+
+    override fun onScroll(
+        e1: MotionEvent?,
+        e2: MotionEvent,
+        distanceX: Float,
+        distanceY: Float
+    ): Boolean {
+        return false
+    }
+
+    override fun onLongPress(e: MotionEvent) {
+        return
+    }
+
+    override fun onFling(
+        e1: MotionEvent?,
+        e2: MotionEvent,
+        velocityX: Float,
+        velocityY: Float
+    ): Boolean {
+        if (e1 != null && e1.y > e2.y) {
+            //turnCamOn(cameraManager)
+            switch.isChecked = true
+        } else if (e1 != null && e1.y < e2.y) {
+            //turnCamOff(cameraManager)
+            switch.isChecked = false
+        }
+
+        return true
     }
 }
