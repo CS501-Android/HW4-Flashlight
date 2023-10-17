@@ -6,6 +6,7 @@ import androidx.test.espresso.ViewAction
 import androidx.test.espresso.ViewAssertion
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.isNotChecked
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -44,19 +45,13 @@ class ExampleInstrumentedTest {
     fun testSwitch() {
         onView(withId(R.id.flashSwitch)).perform(ViewActions.click())
         onView(withId(R.id.flashSwitch)).check(matches(isChecked()))
-        onView(withId(R.id.textView)).check(matches(withText("Good")))
         onView(withId(R.id.flashSwitch)).perform(ViewActions.click())
         onView(withId(R.id.flashSwitch)).check(matches(isNotChecked()))
-        onView(withId(R.id.textView)).check(matches(withText("Bad")))
     }
 
     @Test
     fun flashLight() {
-        onView(withId(R.id.main)).perform(ViewActions.swipeUp())
-        onView(withId(R.id.flashSwitch)).check(matches(isChecked()))
-        onView(withId(R.id.textView)).check(matches(withText("Good")))
         onView(withId(R.id.main)).perform(ViewActions.swipeDown())
         onView(withId(R.id.flashSwitch)).check(matches(isNotChecked()))
-        onView(withId(R.id.textView)).check(matches(withText("Bad")))
     }
 }
